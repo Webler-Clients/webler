@@ -1,0 +1,59 @@
+---
+import { Linkedin, Twitter, Facebook } from 'lucide-react';
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Webler</h3>
+        <p class="footer-about">
+          AI-powered websites managed by humans. We deliver Fortune-500 caliber digital presence for independent professionals through predictable subscription service with unlimited support.
+        </p>
+        <div class="footer-social">
+          <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+            <Linkedin size={24} />
+          </a>
+          <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
+            <Twitter size={24} />
+          </a>
+          <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+            <Facebook size={24} />
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <ul class="footer-links">
+          <li><a href="mailto:hello@webler.ai">hello@webler.ai</a></li>
+          <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        &copy; {new Date().getFullYear()} Webler. All rights reserved.
+      </div>
+      <div class="footer-webler">
+        Built with <a href="https://webler.ai" target="_blank" rel="noopener noreferrer">Webler</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* Footer styles are in styles.css */
+</style>

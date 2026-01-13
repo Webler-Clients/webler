@@ -1,0 +1,104 @@
+---
+import "../styles/global.css";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Webler - Build beautiful websites in minutes with AI. Professional, fast, affordable." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=Fira+Sans:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+    <title>Webler - AI Website Builder</title>
+  </head>
+  <body class="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <!-- Grid Pattern -->
+      <div class="absolute inset-0 base-grid opacity-30"></div>
+
+      <!-- Gradient Orbs -->
+      <div class="absolute top-1/4 -left-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px] animate-pulse-slow"></div>
+      <div class="absolute bottom-1/4 -right-32 w-96 h-96 bg-violet-600/15 rounded-full blur-[128px] animate-pulse-slow animation-delay-2000"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-400/10 rounded-full blur-[200px]"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
+      <!-- Logo -->
+      <div class="animate-fade-in mb-12">
+        <img
+          src="/images/logo-white.png"
+          alt="Webler"
+          class="h-16 md:h-20 w-auto mx-auto"
+        />
+      </div>
+
+      <!-- Message -->
+      <div class="max-w-2xl mx-auto space-y-6 animate-slide-up animation-delay-200">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold font-display tracking-tight">
+          Oops! Wrong turn
+          <span class="block mt-2 bg-gradient-to-r from-purple-400 via-violet-400 to-purple-500 bg-clip-text text-transparent">
+            but we've got you covered
+          </span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-gray-400 leading-relaxed max-w-xl mx-auto animate-slide-up animation-delay-300">
+          Looks like you landed on our hosting infrastructure.
+          Head over to <strong class="text-purple-400">webler.ai</strong> to build your next stunning website in minutes.
+        </p>
+      </div>
+
+      <!-- CTA Button -->
+      <div class="mt-12 animate-scale-in animation-delay-400">
+        <a
+          href="https://webler.ai"
+          class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-violet-600 rounded-full text-lg font-semibold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300"
+        >
+          <span>Visit Webler.ai</span>
+          <svg
+            class="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+
+          <!-- Button Glow Effect -->
+          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-violet-600 blur-xl opacity-50 group-hover:opacity-75 transition-opacity -z-10"></div>
+        </a>
+      </div>
+
+      <!-- Features Pills -->
+      <div class="flex flex-wrap justify-center gap-4 mt-16 animate-fade-in animation-delay-500">
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-300 backdrop-blur-sm">
+          <svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          AI-Powered Design
+        </span>
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-300 backdrop-blur-sm">
+          <svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          Ready in Minutes
+        </span>
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-300 backdrop-blur-sm">
+          <svg class="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          Professional Results
+        </span>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-8 text-center text-sm text-gray-500">
+      <p>© 2024 Webler. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

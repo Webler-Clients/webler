@@ -1,0 +1,477 @@
+name: Generate Client Site (Minimal)
+
+on:
+  workflow_dispatch:
+    inputs:
+      business_name:
+        description: 'Business Name'
+        required: true
+        type: string
+      industry:
+        description: 'Industry/Business Type'
+        required: true
+        type: string
+      services:
+        description: 'Main Services/Products (JSON array string)'
+        required: false
+        type: string
+        default: '[]'
+      tagline:
+        description: 'Business Tagline'
+        required: false
+        type: string
+        default: ''
+      description:
+        description: 'Business Description'
+        required: false
+        type: string
+        default: ''
+      target_audience:
+        description: 'Target Audience'
+        required: false
+        type: string
+        default: ''
+      unique_selling_points:
+        description: 'Unique Selling Points (JSON array string)'
+        required: false
+        type: string
+        default: '[]'
+      contact_email:
+        description: 'Contact Email'
+        required: true
+        type: string
+      contact_phone:
+        description: 'Contact Phone (optional)'
+        required: false
+        type: string
+        default: ''
+      logo_url:
+        description: 'Logo URL (optional)'
+        required: false
+        type: string
+        default: ''
+      colors:
+        description: 'Brand Colors (JSON object: {"primary":"#xxx","secondary":"#xxx","accent":"#xxx"})'
+        required: false
+        type: string
+        default: '{}'
+      language:
+        description: 'Website Language'
+        required: false
+        type: string
+        default: 'en'
+      generation_type:
+        description: 'Generation Type (full or template)'
+        required: false
+        type: string
+        default: 'full'
+
+  # Support external API calls via repository dispatch
+  repository_dispatch:
+    types: [generate-client-site]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
+
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  STATUS_WEBHOOK_URL: ${{ secrets.STATUS_WEBHOOK_URL }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_url: ${{ steps.create_pr.outputs.pr_url }}
+      client_name: ${{ steps.setup.outputs.client_name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          pip install anthropic requests
+
+      - name: Setup inputs and send start webhook
+        id: setup
+        run: |
+          # Extract inputs from workflow_dispatch or repository_dispatch
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "business_name=${{ github.event.inputs.business_name }}" >> $GITHUB_OUTPUT
+            echo "industry=${{ github.event.inputs.industry }}" >> $GITHUB_OUTPUT
+            echo "services=${{ github.event.inputs.services }}" >> $GITHUB_OUTPUT
+            echo "tagline=${{ github.event.inputs.tagline }}" >> $GITHUB_OUTPUT
+            echo "description=${{ github.event.inputs.description }}" >> $GITHUB_OUTPUT
+            echo "target_audience=${{ github.event.inputs.target_audience }}" >> $GITHUB_OUTPUT
+            echo "unique_selling_points=${{ github.event.inputs.unique_selling_points }}" >> $GITHUB_OUTPUT
+            echo "contact_email=${{ github.event.inputs.contact_email }}" >> $GITHUB_OUTPUT
+            echo "contact_phone=${{ github.event.inputs.contact_phone }}" >> $GITHUB_OUTPUT
+            echo "logo_url=${{ github.event.inputs.logo_url }}" >> $GITHUB_OUTPUT
+            echo "colors=${{ github.event.inputs.colors }}" >> $GITHUB_OUTPUT
+            echo "language=${{ github.event.inputs.language }}" >> $GITHUB_OUTPUT
+            echo "generation_type=${{ github.event.inputs.generation_type }}" >> $GITHUB_OUTPUT
+
+            # Generate client_name from business name
+            CLIENT_NAME=$(echo "${{ github.event.inputs.business_name }}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')-$(date +%s)
+            echo "client_name=$CLIENT_NAME" >> $GITHUB_OUTPUT
+            echo "webhook_url=${STATUS_WEBHOOK_URL}" >> $GITHUB_OUTPUT
+          else
+            # Handle repository_dispatch from Convex or other sources
+            echo "business_name=${{ github.event.client_payload.businessName }}" >> $GITHUB_OUTPUT
+            echo "industry=${{ github.event.client_payload.industry }}" >> $GITHUB_OUTPUT
+            echo "services=${{ toJSON(github.event.client_payload.services) }}" >> $GITHUB_OUTPUT
+            echo "tagline=${{ github.event.client_payload.tagline }}" >> $GITHUB_OUTPUT
+            echo "description=${{ github.event.client_payload.description }}" >> $GITHUB_OUTPUT
+            echo "target_audience=${{ github.event.client_payload.targetAudience }}" >> $GITHUB_OUTPUT
+            echo "unique_selling_points=${{ toJSON(github.event.client_payload.uniqueSellingPoints) }}" >> $GITHUB_OUTPUT
+            echo "contact_email=${{ github.event.client_payload.email }}" >> $GITHUB_OUTPUT
+            echo "contact_phone=${{ github.event.client_payload.phoneNumber }}" >> $GITHUB_OUTPUT
+            echo "logo_url=${{ github.event.client_payload.logoUrl }}" >> $GITHUB_OUTPUT
+            echo "colors=${{ toJSON(github.event.client_payload.colors) }}" >> $GITHUB_OUTPUT
+            echo "language=${{ github.event.client_payload.language }}" >> $GITHUB_OUTPUT
+            echo "generation_type=${{ github.event.client_payload.generationType }}" >> $GITHUB_OUTPUT
+
+            # Use provided client_name or generate one
+            if [ -n "${{ github.event.client_payload.clientName }}" ]; then
+              echo "client_name=${{ github.event.client_payload.clientName }}" >> $GITHUB_OUTPUT
+            else
+              CLIENT_NAME=$(echo "${{ github.event.client_payload.businessName }}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')-$(date +%s)
+              echo "client_name=$CLIENT_NAME" >> $GITHUB_OUTPUT
+            fi
+
+            # Use webhook URL from payload or default
+            WEBHOOK_URL="${{ github.event.client_payload.webhookUrl }}"
+            if [ -z "$WEBHOOK_URL" ]; then
+              WEBHOOK_URL="${STATUS_WEBHOOK_URL}"
+            fi
+            echo "webhook_url=$WEBHOOK_URL" >> $GITHUB_OUTPUT
+          fi
+
+          # Send start webhook
+          WEBHOOK_URL="${{ steps.setup.outputs.webhook_url }}"
+          if [ -n "$WEBHOOK_URL" ]; then
+            echo "Sending start webhook to: $WEBHOOK_URL"
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "started",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "message": "Website generation started",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed, continuing..."
+          fi
+
+      - name: Create client branch
+        run: |
+          CLIENT_NAME="${{ steps.setup.outputs.client_name }}"
+          BRANCH_NAME="client/${CLIENT_NAME}-$(date +%Y%m%d-%H%M%S)"
+
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Send initializing webhook
+        run: |
+          WEBHOOK_URL="${{ steps.setup.outputs.webhook_url }}"
+          if [ -n "$WEBHOOK_URL" ]; then
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "initializing",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "message": "Initializing AI generation process",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed, continuing..."
+          fi
+
+      - name: Generate complete website with AI
+        id: generate_ai
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          WEBHOOK_URL="${{ steps.setup.outputs.webhook_url }}"
+
+          # Send AI analyzing webhook
+          if [ -n "$WEBHOOK_URL" ]; then
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "ai_analyzing",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "message": "AI analyzing business requirements...",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed, continuing..."
+          fi
+
+          # Create scripts directory if it doesn't exist
+          mkdir -p scripts
+
+          # Create a Python script to generate the complete website
+          cat > scripts/generate-minimal-site.py << 'PYTHON_SCRIPT'
+import os
+import sys
+import json
+import anthropic
+from pathlib import Path
+
+# Get inputs from environment or arguments
+client_name = os.getenv('CLIENT_NAME', '')
+business_name = os.getenv('BUSINESS_NAME', '')
+industry = os.getenv('INDUSTRY', '')
+services = json.loads(os.getenv('SERVICES', '[]'))
+tagline = os.getenv('TAGLINE', '')
+description = os.getenv('DESCRIPTION', '')
+target_audience = os.getenv('TARGET_AUDIENCE', '')
+unique_selling_points = json.loads(os.getenv('USP', '[]'))
+contact_email = os.getenv('CONTACT_EMAIL', '')
+contact_phone = os.getenv('CONTACT_PHONE', '')
+logo_url = os.getenv('LOGO_URL', '')
+colors = json.loads(os.getenv('COLORS', '{}'))
+language = os.getenv('LANGUAGE', 'en')
+
+# Initialize Anthropic client
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+# Build comprehensive prompt for AI
+prompt = f"""Generate a complete, production-ready Astro website for the following business.
+
+Business Information:
+- Name: {business_name}
+- Industry: {industry}
+- Tagline: {tagline}
+- Description: {description}
+- Target Audience: {target_audience}
+- Services: {', '.join(services)}
+- Unique Selling Points: {', '.join(unique_selling_points)}
+- Contact Email: {contact_email}
+- Contact Phone: {contact_phone}
+- Language: {language}
+
+Brand Colors:
+- Primary: {colors.get('primary', '#3b82f6')}
+- Secondary: {colors.get('secondary', '#8b5cf6')}
+- Accent: {colors.get('accent', '#ec4899')}
+
+Create a complete, single-page Astro website (index.astro) with:
+1. Modern, professional design using Tailwind CSS
+2. Hero section with compelling headline and CTA
+3. Services/Features section showcasing main offerings
+4. About/Why Choose Us section highlighting USPs
+5. Contact section with email/phone
+6. Responsive mobile-first design
+7. Use Framer Motion for subtle animations (optional, via React islands if needed)
+8. Use lucide-react icons where appropriate
+9. Brand colors integrated throughout
+10. SEO-optimized meta tags
+
+Technical requirements:
+- Use Tailwind CSS classes (no custom CSS files)
+- Import global.css for Tailwind base
+- Use provided brand colors as Tailwind color values
+- Modern, clean, professional aesthetic appropriate for {industry}
+- Semantic HTML with proper accessibility
+- Mobile-responsive with breakpoints
+
+Generate ONLY the complete index.astro file content. No explanations, just the code.
+The file should be production-ready and work standalone."""
+
+# Call Claude API
+response = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=16000,
+    messages=[{
+        "role": "user",
+        "content": prompt
+    }]
+)
+
+# Extract generated content
+generated_content = response.content[0].text
+
+# Clean up code block markers if present
+if generated_content.startswith('```'):
+    lines = generated_content.split('\n')
+    generated_content = '\n'.join(lines[1:-1])  # Remove first and last lines (```)
+
+# Create client directory
+client_dir = Path(f'src/pages/clients/{client_name}')
+client_dir.mkdir(parents=True, exist_ok=True)
+
+# Write the generated Astro file
+output_file = client_dir / 'index.astro'
+output_file.write_text(generated_content, encoding='utf-8')
+
+print(f"✅ Generated website at: {output_file}")
+print(f"✅ Business: {business_name}")
+print(f"✅ Industry: {industry}")
+
+PYTHON_SCRIPT
+
+          # Run the generation script
+          export CLIENT_NAME="${{ steps.setup.outputs.client_name }}"
+          export BUSINESS_NAME="${{ steps.setup.outputs.business_name }}"
+          export INDUSTRY="${{ steps.setup.outputs.industry }}"
+          export SERVICES='${{ steps.setup.outputs.services }}'
+          export TAGLINE="${{ steps.setup.outputs.tagline }}"
+          export DESCRIPTION="${{ steps.setup.outputs.description }}"
+          export TARGET_AUDIENCE="${{ steps.setup.outputs.target_audience }}"
+          export USP='${{ steps.setup.outputs.unique_selling_points }}'
+          export CONTACT_EMAIL="${{ steps.setup.outputs.contact_email }}"
+          export CONTACT_PHONE="${{ steps.setup.outputs.contact_phone }}"
+          export LOGO_URL="${{ steps.setup.outputs.logo_url }}"
+          export COLORS='${{ steps.setup.outputs.colors }}'
+          export LANGUAGE="${{ steps.setup.outputs.language }}"
+
+          python scripts/generate-minimal-site.py
+
+          # Send content generated webhook
+          if [ -n "$WEBHOOK_URL" ]; then
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "content_generated",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "message": "Website generated successfully",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed, continuing..."
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git add src/
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "feat: generate website for ${{ steps.setup.outputs.client_name }}
+
+          - AI-generated complete Astro website
+          - Business: ${{ steps.setup.outputs.business_name }}
+          - Industry: ${{ steps.setup.outputs.industry }}
+
+          Generated with Claude API (Sonnet 4.5)
+
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git push origin "$branch_name"
+
+      - name: Create pull request
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_BODY="## 🎨 New Website Generated (AI Full Generation)
+
+          **Client:** ${{ steps.setup.outputs.business_name }}
+          **Industry:** ${{ steps.setup.outputs.industry }}
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M UTC")
+
+          ### ✨ What's Generated
+
+          - 🤖 **Complete AI-Generated Website**: Entire Astro page created from scratch
+          - 🎨 **Custom Design**: Tailored to ${{ steps.setup.outputs.industry }} industry
+          - 📱 **Responsive**: Mobile-first design with Tailwind CSS
+          - ♿ **Accessible**: Semantic HTML and WCAG compliance
+          - 🚀 **Production-Ready**: No additional configuration needed
+
+          ### 📂 Files Added
+
+          - \`src/pages/clients/${{ steps.setup.outputs.client_name }}/index.astro\` - Complete website
+
+          ### 🔗 Preview
+
+          After merging, the site will be available at:
+          \`https://base-minimal.netlify.app/clients/${{ steps.setup.outputs.client_name }}/\`
+
+          ---
+
+          🤖 **Generated with Claude Sonnet 4.5** - Full website generation with zero templates"
+
+          # Send PR creation webhook
+          WEBHOOK_URL="${{ steps.setup.outputs.webhook_url }}"
+          if [ -n "$WEBHOOK_URL" ]; then
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "pr_created",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "message": "Pull request created",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed, continuing..."
+          fi
+
+          # Create the PR
+          PR_URL=$(gh pr create \
+            --title "🚀 New website: ${{ steps.setup.outputs.business_name }}" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "${{ env.branch_name }}" \
+            --label "ai-generated,full-generation" \
+            --assignee "${{ github.actor }}")
+
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "Created PR: $PR_URL"
+
+      - name: Send completion webhook
+        if: success()
+        run: |
+          WEBHOOK_URL="${{ steps.setup.outputs.webhook_url }}"
+          if [ -n "$WEBHOOK_URL" ]; then
+            PR_URL="${{ steps.create_pr.outputs.pr_url }}"
+            if [ -n "$PR_URL" ]; then
+              PR_NUMBER=$(echo "$PR_URL" | grep -o '[0-9]\+$')
+              PREVIEW_URL="https://deploy-preview-${PR_NUMBER}--base-minimal.netlify.app/clients/${{ steps.setup.outputs.client_name }}/"
+            else
+              PREVIEW_URL="https://base-minimal.netlify.app/clients/${{ steps.setup.outputs.client_name }}/"
+            fi
+
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "completed",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "pr_url": "'"${{ steps.create_pr.outputs.pr_url }}"'",
+                "preview_url": "'"$PREVIEW_URL"'",
+                "message": "Website generated successfully",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed, but workflow completed successfully"
+          fi
+
+      - name: Send failure webhook
+        if: failure()
+        run: |
+          WEBHOOK_URL="${{ steps.setup.outputs.webhook_url }}"
+          if [ -n "$WEBHOOK_URL" ]; then
+            curl -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "status": "failed",
+                "client_name": "'"${{ steps.setup.outputs.client_name }}"'",
+                "error": "Workflow failed - check GitHub Actions logs",
+                "message": "Website generation failed",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }' || echo "Webhook failed"
+          fi

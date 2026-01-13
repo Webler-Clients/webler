@@ -1,0 +1,216 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Footer from '../../../components/Footer.astro';
+import { Zap, Users, RefreshCw, Award, TrendingUp, Target, Edit } from 'lucide-react';
+import './styles.css';
+
+const services = [
+  {
+    icon: Zap,
+    title: 'AI-Powered Website Creation',
+    description: 'Launch your professional website in seven days, not months. Our intelligent design system creates custom, enterprise-quality sites while you focus on billable work. No technical knowledge required—just provide your vision and we handle the execution.'
+  },
+  {
+    icon: Users,
+    title: 'Human-Managed Website Support',
+    description: 'Talk to real people who understand your business, not bots or ticket systems. Your dedicated support team provides strategic guidance and responsive assistance whenever your needs change. Relationship-based service that adapts as you grow.'
+  },
+  {
+    icon: RefreshCw,
+    title: 'Unlimited Website Updates',
+    description: 'Modify content, add pages, or refresh messaging as often as needed—all included in your monthly subscription. No scope creep, no surprise invoices, no hesitation to keep your presence current. Predictable pricing that eliminates budget anxiety.'
+  },
+  {
+    icon: Award,
+    title: 'Branding Services',
+    description: 'Project the credibility that Fortune-500 clients expect with cohesive visual identity and messaging strategy. We develop brand assets that position you as the trusted advisor, not just another consultant. Professional polish that commands premium rates.'
+  },
+  {
+    icon: TrendingUp,
+    title: 'SEO Optimization',
+    description: 'Ensure high-value prospects find you when searching for specialized expertise. Our technical optimization and strategic content approach drives qualified traffic without ongoing effort from you. Visibility that generates inbound opportunities while you serve clients.'
+  },
+  {
+    icon: Target,
+    title: 'PPC Campaign Management',
+    description: 'Accelerate client acquisition with targeted advertising campaigns that reach decision-makers actively seeking your services. We handle strategy, execution, and optimization to maximize return on ad spend. Scalable lead generation without the learning curve.'
+  },
+  {
+    icon: Edit,
+    title: 'Content Creation',
+    description: 'Maintain thought leadership presence with professionally crafted content that demonstrates your expertise. We transform your insights into compelling articles, case studies, and web copy that builds authority. Consistent content without consuming your billable hours.'
+  }
+];
+---
+
+<BaseLayout 
+  title="Webler - Fortune-500 Websites in One Week"
+  description="AI-powered websites managed by humans. Fortune-500 quality digital presence for independent professionals in one week. $99/month with unlimited updates."
+>
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-headline">Fortune-500 Websites in One Week</h1>
+          <p class="hero-subheadline">
+            AI-powered design meets human expertise to deliver enterprise-caliber digital presence for independent professionals. Launch credibility that wins high-value clients without technical overhead.
+          </p>
+          <div class="hero-cta">
+            <a href="#contact" class="btn btn-primary btn-large">Get Started Today</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-number">7</span>
+              <span class="hero-stat-label">Days to Launch</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-number">$99</span>
+              <span class="hero-stat-label">Per Month</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-number">∞</span>
+              <span class="hero-stat-label">Updates Included</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="section section-background-pattern" id="services">
+      <div class="container">
+        <h2 style="text-align: center; max-width: 800px; margin-left: auto; margin-right: auto; margin-bottom: var(--space-lg);">
+          Comprehensive Digital Solutions for Independent Professionals
+        </h2>
+        <p class="text-large text-secondary" style="text-align: center; max-width: 700px; margin-left: auto; margin-right: auto; margin-bottom: var(--space-2xl);">
+          Everything you need to establish and maintain enterprise-level digital credibility without the overhead.
+        </p>
+        
+        <div class="services-grid">
+          {services.map((service) => (
+            <article class="service-card">
+              <service.icon className="service-icon" size={48} />
+              <h3 class="service-title">{service.title}</h3>
+              <p class="service-description">{service.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" id="about" style="background-color: white;">
+      <div class="container">
+        <div class="about-content">
+          <h2 style="text-align: center;">Built for Independent Professionals Who Demand Excellence</h2>
+          <p class="about-text">
+            We understand the unique position of fractional executives, consultants, and independent practitioners who serve enterprise clients. You need the digital credibility to compete with large firms, but lack the infrastructure and time for traditional website development. Webler was created specifically to bridge this gap—delivering Fortune-500 quality through our hybrid AI-human model at consultant-friendly economics. Our clients close larger contracts, command premium rates, and reclaim hundreds of hours previously lost to website management.
+          </p>
+          
+          <div class="about-highlights">
+            <div class="about-highlight">
+              <p class="about-highlight-text">
+                <strong>One-week launch timeline</strong> versus 3-6 months with traditional agencies
+              </p>
+            </div>
+            <div class="about-highlight">
+              <p class="about-highlight-text">
+                <strong>Transparent pricing:</strong> $300 setup, $99/month with unlimited updates included
+              </p>
+            </div>
+            <div class="about-highlight">
+              <p class="about-highlight-text">
+                <strong>Direct access</strong> to dedicated team who understand professional services business models
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta-section" id="contact">
+      <div class="container">
+        <div class="cta-content">
+          <h2 class="cta-heading">Ready to Elevate Your Professional Presence?</h2>
+          <p class="cta-description">
+            Schedule a complimentary consultation to discuss your specific needs and see how Webler eliminates technical overhead while delivering enterprise credibility. No obligations, no pressure—just strategic guidance from people who understand your business.
+          </p>
+          <a href="mailto:hello@webler.ai" class="btn cta-button btn-large">Schedule Consultation</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+
+  <script>
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe service cards
+    document.querySelectorAll('.service-card').forEach(card => {
+      observer.observe(card);
+    });
+
+    // Number counter animation for hero stats
+    const animateCounter = (element: HTMLElement, target: string, duration: number = 1000) => {
+      if (target === '∞') {
+        element.textContent = '∞';
+        return;
+      }
+      
+      const numericTarget = parseInt(target.replace(/\D/g, ''));
+      const prefix = target.match(/\$/)?.[0] || '';
+      const startTime = Date.now();
+      
+      const updateCounter = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = Math.floor(progress * numericTarget);
+        
+        element.textContent = prefix + current;
+        
+        if (progress < 1) {
+          requestAnimationFrame(updateCounter);
+        } else {
+          element.textContent = target;
+        }
+      };
+      
+      updateCounter();
+    };
+
+    // Animate stats when hero is visible
+    const heroObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const statNumbers = entry.target.querySelectorAll('.hero-stat-number');
+          statNumbers.forEach((stat) => {
+            const target = stat.textContent?.trim() || '';
+            animateCounter(stat as HTMLElement, target, 1200);
+          });
+          heroObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const heroStats = document.querySelector('.hero-stats');
+    if (heroStats) {
+      heroObserver.observe(heroStats);
+    }
+  </script>
+</BaseLayout>
